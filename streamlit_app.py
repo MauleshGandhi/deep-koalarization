@@ -2,6 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 from PIL import Image
 import io
 import os
@@ -49,20 +50,50 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Define CustomScaleLayer if it exists in your models
+@keras.saving.register_keras_serializable(package="Custom")
+class CustomScaleLayer(keras.layers.Layer):
+    """Custom layer for scaling - registered to handle legacy models"""
+    def __init__(self, scale=1.0, **kwargs):
+        super().__init__(**kwargs)
+        self.scale = scale
+    
+    def call(self, inputs):
+        return inputs * self.scale
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({"scale": self.scale})
+        return config
+
 @st.cache_resource
 def load_colorization_model(model_path):
-    """Load the trained colorization model"""
+    """Load the trained colorization model with custom object handling"""
     try:
         if not os.path.exists(model_path):
             st.warning(f"Model file not found: {model_path}")
             return None
         
-        # Load model without compilation to avoid optimizer issues
-        model = tf.keras.models.load_model(model_path, compile=False)
+        # Define custom objects dictionary for any custom layers
+        custom_objects = {
+            'CustomScaleLayer': CustomScaleLayer,
+        }
+        
+        # Try loading with custom objects scope
+        with keras.saving.custom_object_scope(custom_objects):
+            model = keras.models.load_model(model_path, compile=False)
+        
         st.success(f"✅ Model loaded successfully: {Path(model_path).name}")
         return model
+        
     except Exception as e:
         st.error(f"❌ Error loading model: {str(e)}")
+        st.info("""
+        **Troubleshooting:**
+        - If the model contains custom layers, they need to be defined
+        - Try re-saving the model with the latest Keras version
+        - Ensure TensorFlow versions match between training and deployment
+        """)
         return None
 
 def preprocess_image_for_model(image_pil):
@@ -141,29 +172,6 @@ def colorize_image(model, X_encoder, X_pretrained, original_shape):
     except Exception as e:
         st.error(f"Error during colorization: {str(e)}")
         return None
-
-def create_comparison_plot(original_image, colorized_image):
-    """Create a side-by-side comparison plot"""
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-    
-    # Original image
-    if len(original_image.shape) == 3:
-        # Convert BGR to RGB for display
-        original_display = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
-    else:
-        original_display = original_image
-        
-    axes[0].imshow(original_display)
-    axes[0].set_title("Original Image", fontsize=14)
-    axes[0].axis('off')
-    
-    # Colorized image
-    axes[1].imshow(colorized_image)
-    axes[1].set_title("Colorized Image", fontsize=14)
-    axes[1].axis('off')
-    
-    plt.tight_layout()
-    return fig
 
 def main():
     # Main header
@@ -356,7 +364,7 @@ def main():
                                 - Output: (1, 224, 224, 2)
                                 """)
         elif uploaded_file is not None and model is None:
-            st.error("❌ Model not loaded. Please check if the model file exists.")
+            st.error("❌ Model not loaded. Please check the error messages above.")
         else:
             st.info("👆 Upload an image and click 'Colorize Image' to see the AI colorization in action!")
     
@@ -417,7 +425,6 @@ def main():
         <p><strong>Deep Koalarization: Manga Colorization</strong></p>
         <p>🎓 <em>Anish Mathur, Maulesh Gandhi, Pavan Kondooru | IIIT Hyderabad</em></p>
         <p>📄 Based on "Deep Koalarization: Image Colorization using CNNs and Inception-Resnet-v2"</p>
-        <p>🔗 <a href="https://github.com/your-username/deep-koalarization">GitHub Repository</a></p>
     </div>
     """, unsafe_allow_html=True)
 
