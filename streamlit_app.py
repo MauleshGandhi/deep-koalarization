@@ -2,11 +2,9 @@ import streamlit as st
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
 from PIL import Image
 import io
 import os
-import matplotlib.pyplot as plt
 from pathlib import Path
 
 # Set page config
@@ -50,10 +48,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Define CustomScaleLayer if it exists in your models
-@keras.saving.register_keras_serializable(package="Custom")
-class CustomScaleLayer(keras.layers.Layer):
-    """Custom layer for scaling - registered to handle legacy models"""
+# Define CustomScaleLayer - compatible with TensorFlow 2.x
+class CustomScaleLayer(tf.keras.layers.Layer):
+    """Custom layer for scaling - handles legacy models"""
     def __init__(self, scale=1.0, **kwargs):
         super().__init__(**kwargs)
         self.scale = scale
@@ -65,6 +62,13 @@ class CustomScaleLayer(keras.layers.Layer):
         config = super().get_config()
         config.update({"scale": self.scale})
         return config
+    
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+# Register the custom object globally
+tf.keras.utils.get_custom_objects()['CustomScaleLayer'] = CustomScaleLayer
 
 @st.cache_resource
 def load_colorization_model(model_path):
@@ -79,21 +83,41 @@ def load_colorization_model(model_path):
             'CustomScaleLayer': CustomScaleLayer,
         }
         
-        # Try loading with custom objects scope
-        with keras.saving.custom_object_scope(custom_objects):
-            model = keras.models.load_model(model_path, compile=False)
+        # Load model with custom objects
+        model = tf.keras.models.load_model(
+            model_path, 
+            custom_objects=custom_objects,
+            compile=False
+        )
         
         st.success(f"✅ Model loaded successfully: {Path(model_path).name}")
         return model
         
     except Exception as e:
-        st.error(f"❌ Error loading model: {str(e)}")
-        st.info("""
-        **Troubleshooting:**
-        - If the model contains custom layers, they need to be defined
-        - Try re-saving the model with the latest Keras version
-        - Ensure TensorFlow versions match between training and deployment
-        """)
+        error_msg = str(e)
+        st.error(f"❌ Error loading model: {error_msg}")
+        
+        # Provide specific guidance based on error
+        if "Unknown layer" in error_msg or "custom" in error_msg.lower():
+            st.info("""
+            **Custom Layer Issue Detected**
+            
+            Your model contains custom layers that need to be defined. 
+            
+            **To fix this:**
+            1. Check the error message for the exact custom layer name
+            2. Define that custom layer in the app code
+            3. Add it to the custom_objects dictionary
+            
+            If you know what custom layers were used during training, please share them.
+            """)
+        else:
+            st.info("""
+            **Troubleshooting:**
+            - Ensure TensorFlow versions match between training and deployment
+            - Try re-saving the model with: `model.save('model.h5', save_format='h5')`
+            - Check if the model file is corrupted
+            """)
         return None
 
 def preprocess_image_for_model(image_pil):
