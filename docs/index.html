@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Koalarization: Manga Colorization</title>
+    <style>
+        :root {
+            --color-primary: #2563eb;
+            --color-primary-dark: #1e40af;
+            --color-secondary: #64748b;
+            --color-background: #ffffff;
+            --color-surface: #f8fafc;
+            --color-border: #e2e8f0;
+            --color-text: #1e293b;
+            --color-text-light: #64748b;
+            --color-accent: #0ea5e9;
+            --color-success: #10b981;
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            --space-2xl: 4rem;
+            --radius: 0.5rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-background);
+        }
+
+        /* Header & Navigation */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 100;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .header.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-sm) var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: var(--space-lg);
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--color-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 70px;
+            padding: var(--space-2xl) var(--space-lg);
+            text-align: center;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: var(--space-sm);
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-text-light);
+            margin-bottom: var(--space-xl);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--color-secondary);
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+        }
+
+        .hero-highlights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            justify-content: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .highlight-tag {
+            padding: var(--space-xs) var(--space-md);
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            color: var(--color-text);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Section Styles */
+        .section {
+            padding: var(--space-2xl) var(--space-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            color: var(--color-text);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--color-text-light);
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+        }
+
+        /* About Section */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+
+        .about-card {
+            padding: var(--space-lg);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .about-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: var(--space-sm);
+            color: var(--color-primary);
+        }
+
+        .about-card p {
+            color: var(--color-secondary);
+            line-height: 1.7;
+        }
+
+        /* Research Section */
+        .research-content {
+            margin-top: var(--space-xl);
+        }
+
+        .research-subsection {
+            margin-bottom: var(--space-xl);
+        }
+
+        .research-subsection h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-md);
+            color: var(--color-primary);
+        }
+
+        .research-subsection p {
+            color: var(--color-secondary);
+            line-height: 1.8;
+            margin-bottom: var(--space-md);
+        }
+
+        .architecture-box {
+            background: var(--color-surface);
+            padding: var(--space-lg);
+            border-radius: var(--radius);
+            border: 1px solid var(--color-border);
+            margin: var(--space-lg) 0;
+        }
+
+        .architecture-diagram {
+            background: white;
+            padding: var(--space-xl);
+            border-radius: var(--radius);
+            text-align: center;
+            border: 2px dashed var(--color-border);
+            margin: var(--space-md) 0;
+        }
+
+        .architecture-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+            font-family: 'Courier New', monospace;
+        }
+
+        .arch-block {
+            padding: var(--space-md);
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius);
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--color-secondary);
+        }
+
+        .features-list {
+            list-style: none;
+            margin: var(--space-md) 0;
+        }
+
+        .features-list li {
+            padding: var(--space-sm);
+            margin-bottom: var(--space-xs);
+            padding-left: var(--space-lg);
+            position: relative;
+            color: var(--color-secondary);
+        }
+
+        .features-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-success);
+            font-weight: bold;
+        }
+
+        /* Results Section */
+        .results-table {
+            width: 100%;
+            margin: var(--space-xl) 0;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .results-table th {
+            background: var(--color-surface);
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .results-table tr:hover {
+            background: var(--color-surface);
+        }
+
+        .best-model {
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .metric-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--color-success);
+            color: white;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .sample-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-xl) 0;
+        }
+
+        .image-placeholder {
+            aspect-ratio: 16/9;
+            background: var(--color-surface);
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: var(--space-md);
+        }
+
+        /* Technologies Section */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+
+        .tech-card {
+            padding: var(--space-lg);
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .tech-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tech-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .tech-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: var(--space-xs);
+            color: var(--color-text);
+        }
+
+        .tech-card p {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+        }
+
+        /* Code Section */
+        .code-files {
+            display: grid;
+            gap: var(--space-md);
+            margin: var(--space-xl) 0;
+        }
+
+        .code-file {
+            padding: var(--space-lg);
+            background: var(--color-surface);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius);
+        }
+
+        .code-file h3 {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: var(--color-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .code-file p {
+            color: var(--color-secondary);
+        }
+
+        .installation-box {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: var(--space-lg);
+            border-radius: var(--radius);
+            font-family: 'Courier New', monospace;
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+        }
+
+        .installation-box code {
+            color: #94a3b8;
+        }
+
+        .installation-box .command {
+            color: #10b981;
+            display: block;
+            margin: var(--space-xs) 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-xl) var(--space-lg);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .authors {
+            font-size: 1.1rem;
+            margin-bottom: var(--space-sm);
+            color: var(--color-text);
+        }
+
+        .institution {
+            font-size: 1rem;
+            color: var(--color-text-light);
+            margin-bottom: var(--space-lg);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--space-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--space-md);
+        }
+
+        .footer-link {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .architecture-flow {
+                flex-direction: column;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+
+            .results-table {
+                font-size: 0.85rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: var(--space-sm);
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav-container">
+            <a href="#" class="nav-logo">Deep Koalarization</a>
+            <ul class="nav-menu">
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#research" class="nav-link">Research</a></li>
+                <li><a href="#results" class="nav-link">Results</a></li>
+                <li><a href="#technologies" class="nav-link">Technologies</a></li>
+                <li><a href="#code" class="nav-link">Code</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content fade-in">
+            <h1>Deep Koalarization: Manga Colorization</h1>
+            <p class="hero-subtitle">Automatic manga colorization using deep convolutional neural networks and Inception-ResNet-v2</p>
+            <p class="hero-description">
+                A computer vision research project exploring automatic colorization of manga artwork through deep learning, 
+                combining encoder-decoder CNNs with pre-trained feature extractors to generate realistic colorization while 
+                preserving fine details and complex patterns characteristic of manga illustration.
+            </p>
+            <div class="hero-highlights">
+                <span class="highlight-tag">CNN + Inception-ResNet-v2</span>
+                <span class="highlight-tag">LAB Color Space</span>
+                <span class="highlight-tag">Multiple Model Variants</span>
+                <span class="highlight-tag">Manga-Specific Training</span>
+            </div>
+            <div class="hero-buttons">
+                <a href="https://github.com/yourusername/deep-koalarization" target="_blank" class="btn btn-primary">
+                    <span>📁</span> View on GitHub
+                </a>
+                <a href="#demo" class="btn btn-secondary">
+                    <span>🎨</span> Live Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <h2 class="section-title">About the Project</h2>
+        <p class="section-subtitle">
+            Automatic image colorization is a challenging computer vision task that has gained significant attention 
+            with the advent of deep learning. Our project specifically addresses the unique challenges of manga colorization.
+        </p>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>Problem Statement</h3>
+                <p>
+                    Traditional colorization methods often fail on manga images due to their distinctive characteristics: 
+                    extensive use of hatching patterns, screening techniques, and high-contrast line art. These elements 
+                    require specialized approaches to maintain artistic integrity during colorization.
+                </p>
+            </div>
+            <div class="about-card">
+                <h3>Our Solution</h3>
+                <p>
+                    We developed a dual-branch architecture that combines a custom encoder-decoder CNN with pre-trained 
+                    Inception-ResNet-v2 features. This fusion approach captures both low-level details and high-level 
+                    semantic information, enabling realistic colorization of complex manga artwork.
+                </p>
+            </div>
+            <div class="about-card">
+                <h3>Technical Approach</h3>
+                <p>
+                    Our model operates in LAB color space, separating luminance from color information. We trained multiple 
+                    model variants with different hyperparameters on both general ImageNet data (50K images) and manga-specific 
+                    Danbooru2020small dataset to optimize performance.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Section -->
+    <section id="research" class="section" style="background: var(--color-surface);">
+        <h2 class="section-title">Research &amp; Architecture</h2>
+        <p class="section-subtitle">
+            Our work is based on the "Deep Koalarization" paper, adapting and extending the architecture for manga-specific challenges.
+        </p>
+        
+        <div class="research-content">
+            <div class="research-subsection">
+                <h3>Architecture Overview</h3>
+                <p>
+                    The model consists of two parallel branches that are fused at a critical junction point:
+                </p>
+                <div class="architecture-box">
+                    <div class="architecture-diagram">
+                        <div class="architecture-flow">
+                            <div class="arch-block">Input Image (L channel)</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">Encoder CNN</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">Fusion Layer</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">Decoder CNN</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">AB channels</div>
+                        </div>
+                        <div class="architecture-flow" style="margin-top: var(--space-lg);">
+                            <div class="arch-block">Input Image</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">Inception-ResNet-v2</div>
+                            <span class="arch-arrow">→</span>
+                            <div class="arch-block">Feature Extraction</div>
+                            <span class="arch-arrow">↑</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="research-subsection">
+                <h3>Key Innovations</h3>
+                <ul class="features-list">
+                    <li><strong>Fusion Architecture:</strong> Combines task-specific encoder features with pre-trained semantic features from Inception-ResNet-v2</li>
+                    <li><strong>LAB Color Space:</strong> Separates luminance (L) from chrominance (AB), allowing the model to focus on color prediction while preserving original details</li>
+                    <li><strong>Dual Training Strategy:</strong> Initial training on diverse ImageNet images followed by fine-tuning on manga-specific Danbooru2020small dataset</li>
+                    <li><strong>Multi-scale Features:</strong> Leverages hierarchical representations from pre-trained networks to capture both fine details and global context</li>
+                </ul>
+            </div>
+
+            <div class="research-subsection">
+                <h3>Model Variants</h3>
+                <p>
+                    We trained seven model variants with different hyperparameter configurations to analyze the impact of learning rate and training duration:
+                </p>
+                <ul class="features-list">
+                    <li><strong>Koala_00001_20:</strong> Learning rate 0.00001, 20 epochs - Conservative approach for stable convergence</li>
+                    <li><strong>Koala_0001_50:</strong> Learning rate 0.0001, 50 epochs - Balanced training with moderate learning rate</li>
+                    <li><strong>Koala_0005_3/10/40/100:</strong> Learning rate 0.0005 with varying epochs - Exploring optimal training duration</li>
+                    <li><strong>Koala_01_20:</strong> Learning rate 0.01, 20 epochs - Aggressive learning rate for rapid convergence analysis</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="section">
+        <h2 class="section-title">Results &amp; Performance</h2>
+        <p class="section-subtitle">
+            Comprehensive evaluation of model variants shows consistent performance with subtle trade-offs between accuracy and loss metrics.
+        </p>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-xl); margin-bottom: var(--space-md); color: var(--color-primary);">Model Performance Comparison</h3>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Learning Rate</th>
+                    <th>Epochs</th>
+                    <th>Test Accuracy</th>
+                    <th>Test Loss</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="best-model">
+                    <td><strong>Koala_00001_20</strong> <span class="metric-badge">Best</span></td>
+                    <td>0.00001</td>
+                    <td>20</td>
+                    <td><strong>0.659</strong></td>
+                    <td><strong>0.0116</strong></td>
+                </tr>
+                <tr>
+                    <td>Koala_0001_50</td>
+                    <td>0.0001</td>
+                    <td>50</td>
+                    <td>0.649</td>
+                    <td>0.0128</td>
+                </tr>
+                <tr>
+                    <td>Koala_0005_100</td>
+                    <td>0.0005</td>
+                    <td>100</td>
+                    <td>0.649</td>
+                    <td>0.0138</td>
+                </tr>
+                <tr>
+                    <td>Koala_0005_40</td>
+                    <td>0.0005</td>
+                    <td>40</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Koala_0005_10</td>
+                    <td>0.0005</td>
+                    <td>10</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Koala_0005_3</td>
+                    <td>0.0005</td>
+                    <td>3</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Koala_01_20</td>
+                    <td>0.01</td>
+                    <td>20</td>
+                    <td>0.633</td>
+                    <td>0.965</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-2xl); margin-bottom: var(--space-md); color: var(--color-primary);">Key Findings</h3>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>Optimal Configuration</h3>
+                <p>
+                    The Koala_00001_20 model achieved the best performance with 65.9% accuracy and lowest loss of 0.0116, 
+                    demonstrating that lower learning rates with adequate training epochs produce superior colorization quality.
+                </p>
+            </div>
+            <div class="about-card">
+                <h3>Learning Rate Impact</h3>
+                <p>
+                    Higher learning rates (0.01) resulted in significantly higher loss values (0.965), indicating training instability. 
+                    Conservative learning rates (0.00001-0.0005) provided better convergence and generalization.
+                </p>
+            </div>
+            <div class="about-card">
+                <h3>Training Duration</h3>
+                <p>
+                    Extended training (50-100 epochs) with moderate learning rates maintained competitive accuracy around 64.9%, 
+                    showing that the model reaches performance plateau relatively early in training.
+                </p>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-2xl); margin-bottom: var(--space-md); color: var(--color-primary);">Sample Results</h3>
+        <div class="sample-images">
+            <div class="image-placeholder">Original Grayscale Manga</div>
+            <div class="image-placeholder">Colorized Output</div>
+            <div class="image-placeholder">Original Grayscale Manga</div>
+            <div class="image-placeholder">Colorized Output</div>
+        </div>
+        <p style="color: var(--color-text-light); text-align: center; font-style: italic; margin-top: var(--space-md);">
+            Sample images demonstrate the model's ability to generate natural-looking colors while preserving fine details, hatching patterns, and line art quality.
+        </p>
+    </section>
+
+    <!-- Technologies Section -->
+    <section id="technologies" class="section" style="background: var(--color-surface);">
+        <h2 class="section-title">Technologies &amp; Tools</h2>
+        <p class="section-subtitle">
+            Built with modern deep learning frameworks and computer vision libraries.
+        </p>
+        <div class="tech-grid">
+            <div class="tech-card">
+                <div class="tech-icon">🧠</div>
+                <h3>TensorFlow/Keras</h3>
+                <p>Deep learning framework for model development and training</p>
+            </div>
+            <div class="tech-card">
+                <div class="tech-icon">👁️</div>
+                <h3>OpenCV</h3>
+                <p>Image processing and color space transformations</p>
+            </div>
+            <div class="tech-card">
+                <div class="tech-icon">🏗️</div>
+                <h3>Inception-ResNet-v2</h3>
+                <p>Pre-trained architecture for feature extraction</p>
+            </div>
+            <div class="tech-card">
+                <div class="tech-icon">🎨</div>
+                <h3>LAB Color Space</h3>
+                <p>Perceptually uniform color representation</p>
+            </div>
+            <div class="tech-card">
+                <div class="tech-icon">🚀</div>
+                <h3>Streamlit</h3>
+                <p>Interactive web interface for model demonstration</p>
+            </div>
+            <div class="tech-card">
+                <div class="tech-icon">📊</div>
+                <h3>NumPy/Pandas</h3>
+                <p>Data manipulation and numerical computation</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Section -->
+    <section id="code" class="section">
+        <h2 class="section-title">Code &amp; Implementation</h2>
+        <p class="section-subtitle">
+            Clean, well-documented code with modular structure for training, inference, and deployment.
+        </p>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-xl); margin-bottom: var(--space-md); color: var(--color-primary);">Repository Structure</h3>
+        <div class="code-files">
+            <div class="code-file">
+                <h3>streamlit_demo.py</h3>
+                <p>Interactive web application for testing the model on custom images. Upload manga artwork and see colorization results in real-time using any of the seven trained model variants.</p>
+            </div>
+            <div class="code-file">
+                <h3>train.py</h3>
+                <p>Training script with configurable hyperparameters including learning rate, batch size, and epochs. Supports both ImageNet pre-training and manga-specific fine-tuning.</p>
+            </div>
+            <div class="code-file">
+                <h3>inference.py</h3>
+                <p>Inference utilities for batch processing and single image colorization. Handles color space conversions, model loading, and result post-processing.</p>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-2xl); margin-bottom: var(--space-md); color: var(--color-primary);">Installation &amp; Usage</h3>
+        <div class="installation-box">
+            <code># Clone the repository</code>
+            <span class="command">git clone https://github.com/yourusername/deep-koalarization.git</span>
+            <span class="command">cd deep-koalarization</span>
+            <br>
+            <code># Install dependencies</code>
+            <span class="command">pip install -r requirements.txt</span>
+            <br>
+            <code># Run the Streamlit demo</code>
+            <span class="command">streamlit run streamlit_demo.py</span>
+            <br>
+            <code># Train a new model</code>
+            <span class="command">python train.py --lr 0.0001 --epochs 50 --batch-size 32</span>
+            <br>
+            <code># Run inference on images</code>
+            <span class="command">python inference.py --model koala_00001_20.h5 --input image.jpg</span>
+        </div>
+
+        <h3 style="font-size: 1.5rem; margin-top: var(--space-2xl); margin-bottom: var(--space-md); color: var(--color-primary);" id="demo">Live Demo</h3>
+        <div class="about-card" style="max-width: 800px; margin: 0 auto;">
+            <p style="margin-bottom: var(--space-md);">
+                An interactive Streamlit application is available to test the model with your own manga images. 
+                The demo allows you to:
+            </p>
+            <ul class="features-list">
+                <li>Upload grayscale manga images</li>
+                <li>Select from any of the seven trained model variants</li>
+                <li>View colorization results in real-time</li>
+                <li>Compare different model outputs side-by-side</li>
+                <li>Download colorized images</li>
+            </ul>
+            <div style="text-align: center; margin-top: var(--space-lg);">
+                <a href="https://your-streamlit-app.streamlit.app" target="_blank" class="btn btn-primary">
+                    <span>🎨</span> Launch Streamlit Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="authors">
+                <strong>Authors:</strong> Anish Mathur, Maulesh Gandhi, Pavan Kondooru
+            </p>
+            <p class="institution">International Institute of Information Technology, Hyderabad (IIIT-H)</p>
+            <div class="footer-links">
+                <a href="https://github.com/yourusername/deep-koalarization" target="_blank" class="footer-link">GitHub Repository</a>
+                <a href="https://your-streamlit-app.streamlit.app" target="_blank" class="footer-link">Live Demo</a>
+                <a href="#" target="_blank" class="footer-link">Research Paper</a>
+                <a href="mailto:anish@example.com" class="footer-link">Contact</a>
+            </div>
+            <p style="margin-top: var(--space-lg); color: var(--color-text-light); font-size: 0.9rem;">
+                © 2025 Deep Koalarization Project. Built for educational and research purposes.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Header scroll effect
+        const header = document.getElementById('header');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && document.querySelector(href)) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade in elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe sections for fade-in effect
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
