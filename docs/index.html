@@ -3,472 +3,713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Koalarization: Manga Colorization Project</title>
+    <title>Deep Koalarization: Image Colorization Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Design System Variables */
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+            
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            
+            --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-size-base: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 20px;
+            --font-size-2xl: 24px;
+            --font-size-3xl: 32px;
+            --font-size-4xl: 40px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 550;
+            --font-weight-bold: 600;
+            --line-height-normal: 1.6;
+            --line-height-tight: 1.3;
+            
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-48: 48px;
+            --space-64: 64px;
+            
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-gray-400-rgb: 119, 124, 124;
+                --color-teal-300-rgb: 50, 184, 198;
+                --color-gray-300-rgb: 167, 169, 169;
+                --color-gray-200-rgb: 245, 245, 245;
+                
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+                --color-primary: var(--color-teal-300);
+                --color-primary-hover: var(--color-teal-400);
+                --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+                --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+        html {
+            scroll-behavior: smooth;
         }
 
-        .container {
+        body {
+            font-family: 'Inter', var(--font-family-base);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-normal);
+            color: var(--color-text);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+            padding-top: 70px;
+        }
+
+        /* Fixed Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            nav {
+                background: rgba(31, 33, 33, 0.95);
+            }
+        }
+
+        .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .nav-brand {
+            font-size: 18px;
             font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
         }
 
-        header p {
-            font-size: 1.2em;
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            color: white;
+            padding: 80px 24px 80px;
+            text-align: center;
+            margin: -70px -24px 64px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero .subtitle {
+            font-size: 20px;
+            margin-bottom: 16px;
             opacity: 0.95;
-            margin-bottom: 20px;
+            font-weight: 500;
         }
 
-        .authors {
-            font-size: 1em;
-            margin-top: 15px;
+        .hero .authors {
+            font-size: 16px;
+            margin-bottom: 32px;
             opacity: 0.9;
         }
 
-        .section {
-            background: white;
-            margin: 30px 0;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        .hero .abstract-text {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 24px 32px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+            line-height: 1.7;
+            margin-top: 32px;
+            text-align: left;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: var(--space-32) var(--space-24);
+        }
+
+        /* Section Animations */
+        section {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Section Dividers */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--color-border) 50%, transparent);
+            margin: 64px 0;
+        }
+
+        .author-name {
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        section {
+            margin-bottom: var(--space-64);
+            scroll-margin-top: 90px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 18px;
         }
 
         h2 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text);
+            margin-bottom: var(--space-24);
+            line-height: var(--line-height-tight);
         }
 
         h3 {
-            color: #764ba2;
-            font-size: 1.5em;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text);
+            margin-top: var(--space-48);
+            margin-bottom: var(--space-16);
+        }
+
+        h4 {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text);
+            margin-top: var(--space-32);
+            margin-bottom: var(--space-12);
         }
 
         p {
-            margin-bottom: 15px;
-            text-align: justify;
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
         }
 
-        .highlight-box {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .card h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .image-container {
+        figure {
+            margin: var(--space-32) 0;
             text-align: center;
-            margin: 30px 0;
+            transition: transform 0.3s ease;
         }
 
-        .image-container img {
+        figure img {
             max-width: 100%;
             height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin: 10px 0;
+            border-radius: var(--radius-base);
+            border: 1px solid var(--color-card-border);
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
 
-        .image-caption {
+        figure img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        figcaption {
+            margin-top: var(--space-12);
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
             font-style: italic;
-            color: #666;
-            margin-top: 10px;
-            font-size: 0.95em;
         }
 
-        .results-grid {
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-24);
+            margin: var(--space-32) 0;
+        }
+
+        .image-grid figure {
+            margin: 0;
+        }
+
+        .image-grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin: 30px 0;
+            gap: var(--space-24);
+            margin: var(--space-32) 0;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
+        .image-grid-2 figure {
+            margin: 0;
         }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #ddd;
+        .dataset-section {
+            background-color: var(--color-surface);
+            padding: var(--space-24);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border);
+            margin-bottom: var(--space-24);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--shadow-sm);
         }
 
-        th {
-            background: #667eea;
-            color: white;
-            font-weight: 600;
+        .dataset-section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
-        tr:nth-child(even) {
-            background: #f8f9fa;
+        .dataset-section h4 {
+            margin-top: 0;
+            color: var(--color-primary);
         }
 
-        .impact-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .impact-list li {
-            padding: 15px;
-            margin: 10px 0;
-            background: #f0f4ff;
-            border-radius: 6px;
-            border-left: 4px solid #667eea;
-        }
-
-        .impact-list li:before {
-            content: "✓ ";
-            color: #667eea;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        footer {
-            background: #2d3748;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 50px;
-        }
-
-        .github-link {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 12px 30px;
+        a {
+            color: var(--color-primary);
             text-decoration: none;
-            border-radius: 25px;
-            margin-top: 20px;
-            transition: background 0.3s;
+            transition: color 0.2s ease;
         }
 
-        .github-link:hover {
-            background: #764ba2;
+        a:hover {
+            color: var(--color-primary-hover);
+            text-decoration: underline;
+        }
+
+        .conclusion {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            padding: var(--space-32);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .conclusion h2 {
+            color: #1e3a8a;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .conclusion {
+                background: linear-gradient(135deg, rgba(30, 58, 138, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+            }
+            .conclusion h2 {
+                color: #3b82f6;
+            }
         }
 
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
+            .container {
+                padding: var(--space-24) var(--space-16);
             }
 
-            .section {
-                padding: 20px;
+            .hero {
+                padding: 60px 16px 60px;
+                margin: -70px -16px 48px;
             }
 
-            .grid-container,
-            .results-grid {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero .subtitle {
+                font-size: 16px;
+            }
+
+            .nav-links {
+                gap: 16px;
+            }
+
+            .nav-brand {
+                font-size: 16px;
+            }
+
+            .nav-links a {
+                font-size: 14px;
+            }
+
+            h2 {
+                font-size: var(--font-size-2xl);
+            }
+
+            h3 {
+                font-size: var(--font-size-xl);
+            }
+
+            .image-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .image-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .section-number {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Deep Koalarization</h1>
-            <p>Image Colorization using CNNs and Inception-ResNet-v2 for Manga</p>
-            <div class="authors">
-                <strong>Authors:</strong> Anish Mathur, Maulesh Gandhi, Pavan Kondooru<br>
-                <em>IIIT Hyderabad</em>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-        <!-- Abstract Section -->
-        <div class="section">
-            <h2>Abstract</h2>
-            <p>
-                This project presents our implementation and experimentation based on the paper "Deep Koalarization: Image Colorization using CNNs and Inception-ResNet-v2" with a specific focus on manga colorization. We replicate the original model's results, explore alternative architectures and hyperparameters, and train a custom autoencoder for feature extraction. Our work demonstrates the effectiveness of deep learning approaches for automatic manga colorization, achieving high-quality results with minimal color bleeding and accurate semantic understanding.
-            </p>
-        </div>
-
-        <!-- Methodology Section -->
-        <div class="section">
-            <h2>Methodology</h2>
-            
-            <h3>Architecture Overview</h3>
-            <p>
-                Our model uses a sophisticated encoder-decoder architecture combined with pre-trained semantic feature extraction. Given the luminance (L) component of a grayscale image, the network predicts the chrominance components (a* and b*) in the Lab color space, which are then combined to produce the final colorized image.
-            </p>
-
-            <div class="image-container">
-                <img src="model.jpg" alt="Model Architecture">
-                <p class="image-caption">Figure 1: Overall model architecture combining encoder-decoder with Inception-ResNet-v2 feature extraction</p>
-            </div>
-
-            <div class="highlight-box">
-                <h4>Key Components:</h4>
-                <ul style="margin-left: 20px; margin-top: 10px;">
-                    <li><strong>Feature Extractor:</strong> Inception-ResNet-v2 pre-trained on ImageNet extracts high-level semantic features</li>
-                    <li><strong>Encoder Network:</strong> Processes luminance channel with convolutional layers to capture spatial information</li>
-                    <li><strong>Fusion Layer:</strong> Combines encoder output with semantic features to distribute context across all spatial regions</li>
-                    <li><strong>Decoder Network:</strong> Upsamples fused features to predict chrominance channels at full resolution</li>
-                </ul>
-            </div>
-
-            <div class="image-container">
-                <img src="layers.jpg" alt="Network Layers">
-                <p class="image-caption">Figure 2: Detailed layer specifications - Left: Encoder network, Center: Fusion network, Right: Decoder network</p>
-            </div>
-
-            <h3>Training Process</h3>
-            <p>
-                We trained our models on two datasets: ImageNet (50,000 images) and Danbooru2020small (manga dataset). Images were preprocessed by converting to Lab color space and normalizing. The training utilized ADA GPUs with a batch size of 32, with most models trained for 20-100 epochs depending on the experiment. We split data into 80% training, 10% validation, and 10% testing sets.
-            </p>
-        </div>
-
-        <!-- Experiments Section -->
-        <div class="section">
-            <h2>Experiments & Results</h2>
-
-            <h3>1. Learning Rate Analysis</h3>
-            <p>
-                We conducted extensive experiments with different learning rates (0.00001, 0.0001, 0.0005, 0.01) to understand their impact on convergence and colorization quality. Our findings show that 0.0005 provided the best balance between training speed and result quality.
-            </p>
-
-            <div class="image-container">
-                <img src="vals.jpg" alt="Learning Rate Comparison">
-                <p class="image-caption">Figure 3: Test loss and accuracy across different learning rates and epochs</p>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Learning Rate</th>
-                        <th>Epochs</th>
-                        <th>Test Loss</th>
-                        <th>Test Accuracy</th>
-                        <th>Dataset</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>0.00001</td>
-                        <td>20</td>
-                        <td>0.0116</td>
-                        <td>0.6594</td>
-                        <td>ImageNet</td>
-                    </tr>
-                    <tr>
-                        <td>0.0001</td>
-                        <td>50</td>
-                        <td>0.0128</td>
-                        <td>0.6489</td>
-                        <td>ImageNet</td>
-                    </tr>
-                    <tr>
-                        <td>0.0005</td>
-                        <td>100</td>
-                        <td>0.0080</td>
-                        <td>0.7478</td>
-                        <td>Manga</td>
-                    </tr>
-                    <tr>
-                        <td>0.01</td>
-                        <td>20</td>
-                        <td>0.9655</td>
-                        <td>0.6327</td>
-                        <td>ImageNet</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="results-grid">
-                <div class="image-container">
-                    <img src="C_bird.jpg" alt="Bird colorization with different learning rates">
-                    <p class="image-caption">Learning rate comparison on bird image</p>
-                </div>
-                <div class="image-container">
-                    <img src="C_chair.jpg" alt="Chair colorization with different learning rates">
-                    <p class="image-caption">Learning rate comparison on furniture</p>
-                </div>
-                <div class="image-container">
-                    <img src="C_dog.jpg" alt="Dog colorization with different learning rates">
-                    <p class="image-caption">Learning rate comparison on animal</p>
-                </div>
-                <div class="image-container">
-                    <img src="C_Man.jpg" alt="Portrait colorization with different learning rates">
-                    <p class="image-caption">Learning rate comparison on portrait</p>
-                </div>
-            </div>
-
-            <h3>2. Feature Extractor Comparison</h3>
-            <p>
-                We compared Inception-ResNet-v2 with Inception-v3 as the feature extractor. Inception-ResNet-v2 consistently outperformed Inception-v3 due to its residual connections and batch normalization, which help prevent vanishing gradients and enable better semantic understanding.
-            </p>
-
-            <div class="results-grid">
-                <div class="image-container">
-                    <img src="B_bird.jpg" alt="Bird colorization comparison">
-                    <p class="image-caption">Inception-v3 vs Inception-ResNet-v2 on birds</p>
-                </div>
-                <div class="image-container">
-                    <img src="B_chair.jpg" alt="Chair colorization comparison">
-                    <p class="image-caption">Different feature extractors on furniture</p>
-                </div>
-            </div>
-
-            <div class="image-container">
-                <img src="B_misc.jpg" alt="Complex scene colorization">
-                <p class="image-caption">Figure 4: Feature extractor comparison on complex outdoor scenes</p>
-            </div>
-
-            <h3>3. Custom Autoencoder</h3>
-            <p>
-                We trained a custom autoencoder from scratch on 30,000 ImageNet images to replace the pre-trained Inception-ResNet-v2 feature extractor. This experiment explored whether domain-specific feature learning could improve results.
-            </p>
-
-            <div class="image-container">
-                <img src="autoencoder.jpg" alt="Autoencoder Architecture">
-                <p class="image-caption">Figure 5: Custom autoencoder architecture for feature extraction</p>
-            </div>
-
-            <div class="image-container">
-                <img src="auto.jpg" alt="Autoencoder Results">
-                <p class="image-caption">Figure 6: Colorization results using custom autoencoder features</p>
-            </div>
-
-            <h3>4. Manga Colorization Results</h3>
-            <p>
-                Our primary contribution is the successful application of Deep Koalarization to manga images. The model achieves exceptional results on manga artwork, with accurate color assignment, minimal bleeding, and strong preservation of line art. The simpler visual structure of manga (compared to photographs) allows the model to produce near-ground-truth quality colorizations.
-            </p>
-
-            <div class="results-grid">
-                <div class="image-container">
-                    <img src="D_Man.jpg" alt="Manga male character colorization">
-                    <p class="image-caption">Male character colorization comparison</p>
-                </div>
-                <div class="image-container">
-                    <img src="D_woman.jpg" alt="Manga female character colorization">
-                    <p class="image-caption">Female character colorization comparison</p>
-                </div>
-                <div class="image-container">
-                    <img src="D_unkown.jpg" alt="Manga character colorization">
-                    <p class="image-caption">Complex character with multiple colors</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Impact Section -->
-        <div class="section">
-            <h2>Project Impact</h2>
-
-            <div class="grid-container">
-                <div class="card">
-                    <h4>🎨 Creative Industry Applications</h4>
-                    <p>Automated manga colorization can significantly reduce production time and costs for publishers and independent artists, making colored manga more accessible to global audiences.</p>
-                </div>
-
-                <div class="card">
-                    <h4>📚 Historical Preservation</h4>
-                    <p>The technique can be applied to restore and colorize historical photographs and archival materials, bringing history to life for modern viewers and educational purposes.</p>
-                </div>
-
-                <div class="card">
-                    <h4>🔬 Research Contributions</h4>
-                    <p>Our work demonstrates that Deep Koalarization is highly effective for stylized artwork, opening new research directions for domain-specific colorization approaches.</p>
-                </div>
-            </div>
-
-            <h3>Key Achievements</h3>
-            <ul class="impact-list">
-                <li>Successfully replicated Deep Koalarization paper results with limited computational resources</li>
-                <li>Achieved 74.78% test accuracy on manga dataset with optimized hyperparameters</li>
-                <li>Demonstrated superior performance of Inception-ResNet-v2 over Inception-v3 for feature extraction</li>
-                <li>Identified optimal learning rate (0.0005) for this colorization task through systematic experimentation</li>
-                <li>Proved feasibility of custom autoencoder feature extractors for specialized domains</li>
-                <li>Created high-quality colorization results comparable to ground truth on manga artwork</li>
+    <nav>
+        <div class="nav-container">
+            <a href="#home" class="nav-brand">Deep Koalarization</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#theory">Theory</a></li>
+                <li><a href="#experiments">Experiments</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#impact">Impact</a></li>
             </ul>
+        </div>
+    </nav>
 
-            <div class="highlight-box">
-                <h4>Technical Innovation:</h4>
-                <p>
-                    Our implementation showcases the power of combining pre-trained semantic understanding with task-specific encoder-decoder architectures. The fusion mechanism effectively distributes high-level features across spatial dimensions, enabling the model to make context-aware colorization decisions. This approach is particularly effective for structured content like manga, where semantic understanding of characters, clothing, and scene elements is crucial.
-                </p>
+    <div id="home" class="hero">
+        <div class="hero-content">
+            <h1>Deep Koalarization</h1>
+            <p class="subtitle">Advanced Image Colorization using CNNs and Inception-ResNet-v2</p>
+            <div class="authors">
+                <span class="author-name">Anish Mathur (2020102044)</span>
+                <span class="author-name">Maulesh Gandhi (2020112009)</span>
+                <span class="author-name">Pavan Kondooru (2021122006)</span>
             </div>
-        </div>
-
-        <!-- Conclusion Section -->
-        <div class="section">
-            <h2>Conclusion</h2>
-            <p>
-                This project successfully demonstrates the application of Deep Koalarization to manga colorization, achieving impressive results that rival manual colorization. Through systematic experimentation with learning rates, feature extractors, and custom architectures, we gained valuable insights into the model's behavior and optimal configurations.
-            </p>
-            <p>
-                The success on manga images suggests that this approach is particularly well-suited for stylized artwork with clear boundaries and distinct semantic regions. Future work could explore video colorization, real-time processing, and user-guided colorization with color hints.
-            </p>
-            <p>
-                Our findings contribute to both the academic understanding of deep learning-based colorization and practical applications in the creative industry, demonstrating that state-of-the-art computer vision techniques can be effectively adapted for artistic and commercial purposes.
-            </p>
-        </div>
-
-        <!-- Reference Section -->
-        <div class="section">
-            <h2>Reference</h2>
-            <p style="text-align: left; margin-left: 20px;">
-                Baldassarre, F., González Morín, D., & Rodés-Guirao, L. (2017). <em>Deep Koalarization: Image Colorization using CNNs and Inception-ResNet-v2.</em> arXiv preprint arXiv:1712.03400.
-            </p>
+            <div class="abstract-text">
+                <strong>Abstract:</strong> This project presents our implementation and experimentation based on Deep Koalarization with a focus on manga colorization. We replicate original results, explore alternative models and learning rates, and train custom autoencoders. Our work demonstrates the effectiveness of deep learning approaches for automatic image colorization tasks across diverse datasets.
+            </div>
         </div>
     </div>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Maulesh Gandhi, Anish Mathur, Pavan Kondooru | IIIT Hyderabad</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">Deep Koalarization: Manga Colorization Project</p>
-        </div>
-    </footer>
+    <div class="container">
+
+        <section id="theory">
+            <div class="section-header">
+                <span class="section-number">1</span>
+                <h2 style="margin: 0;">Theory and Approach</h2>
+            </div>
+            <p>Image colorization is a challenging task in computer vision that aims to automatically add color to grayscale images. The Deep Koalarization approach leverages deep convolutional neural networks (CNNs) and the Inception-ResNet-v2 architecture to achieve accurate and visually pleasing colorization results.</p>
+            
+            <p>The method works by taking the luminance (L) component of an image and predicting the chrominance channels (a* and b*) in the Lab color space. These components are then combined to generate a fully colorized image. The architecture uses Inception-ResNet-v2 as a feature extractor, which provides a rich semantic embedding of the grayscale image just before the softmax layer.</p>
+            
+            <p>This embedding is fused with the output of the encoder network to ensure that semantic information is uniformly distributed across all spatial regions of the image. This fusion mechanism makes the model robust to arbitrary input sizes and helps maintain consistency in colorization across different parts of the image.</p>
+
+            <figure>
+                <img src="model.jpg" alt="Model Architecture Diagram">
+                <figcaption>Figure 1: Overall Model Architecture - The complete pipeline from grayscale input to colorized output</figcaption>
+            </figure>
+
+            <figure>
+                <img src="layers.jpg" alt="Network Layers Detail">
+                <figcaption>Figure 2: Detailed Network Architecture - Left: encoder network, Middle: fusion network, Right: decoder network</figcaption>
+            </figure>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="datasets">
+            <div class="section-header">
+                <span class="section-number">2</span>
+                <h2 style="margin: 0;">Dataset Description</h2>
+            </div>
+            
+            <div class="dataset-section">
+                <h4>ImageNet Dataset</h4>
+                <p>The ImageNet dataset is composed of millions of images spanning a wide variety of categories based on the WordNet hierarchy. For this project, we used a subset of 50,000 images to simplify training and reduce computational requirements. All images were rescaled to 224 × 224 pixels for the encoder branch input and to 299 × 299 pixels for the Inception-ResNet-v2 feature extractor.</p>
+                <p>The heterogeneous nature of ImageNet images provides a diverse training set that helps the model learn to colorize various types of objects, scenes, and compositions. This dataset is particularly valuable for training general-purpose colorization models.</p>
+            </div>
+
+            <div class="dataset-section">
+                <h4>Danbooru2020small Dataset</h4>
+                <p>The Danbooru2020small dataset is a curated subset specifically designed for anime and manga-related image analysis tasks. It contains high-quality anime-style illustrations, character artwork, and manga panels covering various themes, genres, and artistic styles prevalent in the anime and manga domain.</p>
+                <p>This dataset is particularly suitable for manga colorization tasks because it captures the unique visual characteristics of manga art, including distinct line work, shading patterns, and stylistic conventions that differ from photographic images. Using this specialized dataset allows the model to learn colorization patterns specific to the manga domain.</p>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="experiments">
+            <div class="section-header">
+                <span class="section-number">3</span>
+                <h2 style="margin: 0;">Implementation and Experiments</h2>
+            </div>
+            
+            <h3>Reproducing Original Results</h3>
+            <p>To validate our implementation, we first replicated the original model results from the Deep Koalarization paper. We followed the same architecture and training methodology, using a learning rate of 0.0005 and training for 100 epochs. The model was trained on 80% of the data, with 10% each reserved for validation and testing.</p>
+            
+            <p>Due to computational constraints, we used a batch size of 32 and trained on GPU hardware, with each epoch taking approximately 10 minutes. The results demonstrate that our implementation successfully replicates the original paper's findings, producing high-quality colorizations with accurate color distribution and minimal artifacts.</p>
+
+            <div class="image-grid">
+                <figure>
+                    <img src="B_bird.jpg" alt="Bird Colorization Result">
+                    <figcaption>Bird colorization using original model</figcaption>
+                </figure>
+                <figure>
+                    <img src="B_chair.jpg" alt="Chair Colorization Result">
+                    <figcaption>Chair colorization using original model</figcaption>
+                </figure>
+                <figure>
+                    <img src="B_misc.jpg" alt="Miscellaneous Colorization Result">
+                    <figcaption>Various objects colorization using original model</figcaption>
+                </figure>
+            </div>
+
+            <h3>Learning Rate Experiments</h3>
+            <p>To analyze the model's sensitivity to hyperparameters, we conducted experiments with three different learning rates: 0.01, 0.0005, and 0.00001. This exploration helped us understand the impact of learning rate on convergence speed and final model performance.</p>
+            
+            <p>Our experiments revealed that the learning rate should be carefully balanced—neither too small nor too large. A learning rate of 0.01 proved too aggressive, preventing the loss function from reaching the global minimum. Conversely, 0.00001 was too conservative, resulting in slow convergence without significant improvement in results. The optimal learning rate of 0.0005 struck the right balance, allowing the model to converge efficiently while achieving high-quality colorization results.</p>
+
+            <figure>
+                <img src="vals.jpg" alt="Validation Loss and Accuracy">
+                <figcaption>Figure 3: Testing loss and accuracies across different learning rates</figcaption>
+            </figure>
+
+            <div class="image-grid">
+                <figure>
+                    <img src="C_bird.jpg" alt="Learning Rate Comparison - Bird">
+                    <figcaption>Bird colorization with varied learning rates</figcaption>
+                </figure>
+                <figure>
+                    <img src="C_chair.jpg" alt="Learning Rate Comparison - Chair">
+                    <figcaption>Chair colorization with varied learning rates</figcaption>
+                </figure>
+                <figure>
+                    <img src="C_dog.jpg" alt="Learning Rate Comparison - Dog">
+                    <figcaption>Dog colorization with varied learning rates</figcaption>
+                </figure>
+                <figure>
+                    <img src="C_Man.jpg" alt="Learning Rate Comparison - Person">
+                    <figcaption>Person colorization with varied learning rates</figcaption>
+                </figure>
+            </div>
+
+            <h3>Alternative Feature Extractors</h3>
+            <p>In addition to the original Inception-ResNet-v2 model, we experimented with Inception-v3 as an alternative feature extractor. While both architectures share the inception module concept, Inception-ResNet-v2 incorporates residual connections that help alleviate the vanishing gradient problem and enable deeper network architectures.</p>
+            
+            <p>Our comparison revealed that Inception-ResNet-v2 consistently outperforms Inception-v3 in colorization tasks. The batch normalization and residual connections in Inception-ResNet-v2 help the model better capture and preserve semantic features, resulting in more accurate and natural-looking colorizations with better preservation of fine details.</p>
+
+            <div class="image-grid">
+                <figure>
+                    <img src="B_bird.jpg" alt="Feature Extractor Comparison - Bird">
+                    <figcaption>Bird colorization comparing feature extractors</figcaption>
+                </figure>
+                <figure>
+                    <img src="B_chair.jpg" alt="Feature Extractor Comparison - Chair">
+                    <figcaption>Chair colorization comparing feature extractors</figcaption>
+                </figure>
+                <figure>
+                    <img src="B_misc.jpg" alt="Feature Extractor Comparison - Misc">
+                    <figcaption>Various objects comparing feature extractors</figcaption>
+                </figure>
+            </div>
+
+            <h3>Autoencoder Feature Extraction</h3>
+            <p>To investigate alternative feature extraction mechanisms, we trained a custom autoencoder on the ImageNet dataset (30,000 images due to time constraints). The autoencoder learns to extract relevant features from grayscale images in an unsupervised manner, creating a compressed representation that captures essential visual information.</p>
+            
+            <p>This trained autoencoder was then used as a replacement for the pre-trained Inception-ResNet-v2 feature extractor. The autoencoder approach demonstrates the potential for custom feature extraction mechanisms tailored specifically to the colorization task, potentially reducing dependency on large pre-trained models while maintaining competitive performance.</p>
+
+            <div class="image-grid-2">
+                <figure>
+                    <img src="autoencoder.jpg" alt="Autoencoder Architecture">
+                    <figcaption>Figure 4: Autoencoder architecture for feature extraction</figcaption>
+                </figure>
+                <figure>
+                    <img src="auto.jpg" alt="Autoencoder Output Results">
+                    <figcaption>Figure 5: Colorization results using autoencoder-based feature extraction</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="manga-results" id="results">
+            <div class="section-header">
+                <span class="section-number">4</span>
+                <h2 style="margin: 0;">Manga Dataset Results</h2>
+            </div>
+            <p>A key focus of our project was evaluating the Deep Koalarization approach on manga images using the Danbooru2020small dataset. Manga colorization presents unique challenges due to the distinct artistic style, line-based drawing techniques, and specific visual conventions used in manga artwork.</p>
+            
+            <p>Our results on the manga dataset are particularly impressive. The model demonstrates excellent performance, producing colorizations that are very close to the ground truth. The features in manga images are often easier to identify and less dense than in photographic images, which may contribute to the high-quality results.</p>
+            
+            <p>Notably, our approach shows very low color overspilling and minimal artifacts—common problems in previous manga colorization methods. The model successfully maintains the crisp line work characteristic of manga art while adding natural and appropriate colors. This represents a significant advancement in automated manga colorization technology.</p>
+
+            <div class="image-grid">
+                <figure>
+                    <img src="D_Man.jpg" alt="Manga Colorization - Male Character">
+                    <figcaption>Male character manga colorization result</figcaption>
+                </figure>
+                <figure>
+                    <img src="D_woman.jpg" alt="Manga Colorization - Female Character">
+                    <figcaption>Female character manga colorization result</figcaption>
+                </figure>
+                <figure>
+                    <img src="D_unkown.jpg" alt="Manga Colorization - Character">
+                    <figcaption>Character manga colorization result</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="impact">
+            <div class="conclusion">
+                <h2>Project Impact and Conclusion</h2>
+                <p>This project successfully demonstrates the effectiveness of deep learning approaches for automatic image colorization, with particular emphasis on manga colorization. Our implementation validates the Deep Koalarization method and provides valuable insights through systematic experimentation with different architectures, hyperparameters, and datasets.</p>
+                
+                <p><strong>Key Achievements:</strong></p>
+                <ul style="margin-left: var(--space-24); margin-bottom: var(--space-16);">
+                    <li>Successfully replicated the original Deep Koalarization model with comparable results</li>
+                    <li>Demonstrated the superiority of Inception-ResNet-v2 over Inception-v3 for colorization tasks</li>
+                    <li>Identified optimal learning rates through systematic experimentation</li>
+                    <li>Developed and evaluated a custom autoencoder-based feature extraction approach</li>
+                    <li>Achieved exceptional results on manga colorization with minimal artifacts and overspilling</li>
+                </ul>
+
+                <p><strong>Impact and Applications:</strong></p>
+                <p>The significance of this work extends beyond technical achievement. Automatic manga colorization has substantial practical applications in the entertainment industry, potentially reducing the time and cost required for manga production. It can help preserve and revitalize historical manga works by adding color, making them more accessible to modern audiences.</p>
+                
+                <p>Furthermore, our findings contribute to the broader field of image colorization by demonstrating how domain-specific datasets (like Danbooru2020small for manga) can significantly improve performance for specialized applications. The success of our approach on manga images suggests that similar specialized approaches could benefit other domains such as historical photograph restoration, medical imaging, and artistic applications.</p>
+                
+                <p>This project demonstrates that with careful architecture design, appropriate feature extraction, and domain-specific training data, deep learning models can achieve human-quality colorization results, opening new possibilities for automated creative assistance tools and historical preservation efforts.</p>
+            </div>
+        </section>
+    </div>
 </body>
 </html>
